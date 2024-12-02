@@ -1,0 +1,44 @@
+def ik(x,y,t1,l1,l2):
+  r=np.sqrt(x**2+y**2)
+  if r>l1+l2 or r<abs(l1-l2):
+    raise ValueError("Invalid input")
+  alpha=np.arctan(y/x)
+  beta=np.arccos((r**2+l1**2-l2**2)/(2*l1*r))
+  theta1=alpha-beta
+  theta2=t1-theta1
+  return theta1,theta2
+
+x=0.3 #float(input())
+y=0.5 #float(input())
+t1=np.radians(56) #np.radians(int(input()))
+l1=1 #float(input())
+l2=1 #float(input())
+
+try:
+  t1,t2=ik(x,y,t1,l1,l2)
+  print(f"T1,T2 = {np.degrees(t1):.2f},{np.degrees(t2):.2f}")
+  x1=l1*np.cos(t1)
+  y1=l1*np.sin(t1)
+  x2=x1+l2*np.cos(t1+t2)
+  y2=y1+l2*np.sin(t1+t2)
+  print("Position of the first joint:")
+  print(f"X,Y = {x1:.2f},{y1:.2f}")
+  print("Position of the end effector:")
+  print(f"X,Y = {x2:.2f},{y2:.2f}")
+
+  plt.figure(figsize=(6,6))
+  plt.grid()
+  plt.plot([0,x1],[0,y1],'r-',linewidth=3,label="L1")
+  plt.plot([x1,x2],[y1,y2],'g-',linewidth=3,label="L2")
+  plt.plot(x,y,'bo',markersize=10,label="Target")
+  plt.scatter([0,x1,x2],[0,y1,y2],c='k',zorder=5)
+  plt.legend()
+  plt.xlim([-l2-l1,l2+l1])
+  plt.ylim([-l2-l1,l2+l1])
+  plt.xlabel('x')
+  plt.ylabel('y')
+except ValueError as e:
+  print(e)
+
+
+  
