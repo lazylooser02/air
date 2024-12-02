@@ -1,0 +1,26 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+def fk(t1,t2,l1,l2):
+  return l1*np.cos(t1)+l2*np.cos(t1+t2),l1*np.sin(t1)+l2*np.sin(t1+t2)
+
+t1=np.radians(20) #np.radians(int(input()))
+t2=np.radians(45) #np.radians(int(input()))
+l1=1 #float(input())
+l2=0.5 #float(input())
+x,y=fk(t1,t2,l1,l2)
+x1=l1*np.cos(t1)
+y1=l1*np.sin(t1)
+plt.plot([0,x1],[0,y1],'r-',linewidth=3)
+plt.plot([x1,x],[y1,y],'r-',linewidth=3)
+plt.plot(0,0,'bo',markersize=10)
+plt.plot(x,y,'go',markersize=10)
+plt.plot(x1,y1,'bo',markersize=10)
+plt.grid()
+plt.xlim([-l2-l1,l2+l1])
+plt.ylim([-l2-l1,l2+l1])
+plt.xlabel('x')
+plt.ylabel('y')
+plt.title('FK')
+plt.show()
+print(f"X,Y = {x:.2f},{y:.2f}")
