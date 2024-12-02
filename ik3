@@ -1,0 +1,86 @@
+import numpy as np
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+
+def inverse_kinematics_3d(px, py, pz, l1, l2, l3):
+    """
+    Calculates the joint angles for a 3-DOF robotic arm to reach a given target point in 3D space.
+    """
+    # Calculate theta1
+    theta1 = np.arctan2(py, px)
+
+    # Distance in the XY plane
+    r = np.sqrt(px**2 + py**2)
+    # Total distance from base to target
+    d = np.sqrt(r**2 + (pz - l1)**2)
+
+    # Check reachability
+    if d > (l2 + l3) or d < abs(l2 - l3):
+        raise ValueError("Target is out of reach for the robot arm.")
+
+    # Calculate theta2
+    alpha = np.arctan2(pz - l1, r)
+    beta = np.arccos((l2**2 + d**2 - l3**2) / (2 * l2 * d))
+    theta2 = alpha + beta
+
+    # Calculate theta3
+    gamma = np.arccos((l2**2 + l3**2 - d**2) / (2 * l2 * l3))
+    theta3 = np.pi - gamma
+
+    return theta1, theta2, theta3
+
+# Example parameters
+px = float(input("Enter the x-coordinate of the target point: "))
+py = float(input("Enter the y-coordinate of the target point: "))
+pz = float(input("Enter the z-coordinate of the target point: "))
+l1 = 1.0  # Length of the first link
+l2 = 1.0  # Length of the second link
+l3 = 1.0  # Length of the third link
+
+try:
+    theta1, theta2, theta3 = inverse_kinematics_3d(px, py, pz, l1, l2, l3)
+    theta1_deg = np.degrees(theta1)
+    theta2_deg = np.degrees(theta2)
+    theta3_deg = np.degrees(theta3)
+
+    print(f"Joint angle θ1: {theta1_deg:.2f} degrees")
+    print(f"Joint angle θ2: {theta2_deg:.2f} degrees")
+    print(f"Joint angle θ3: {theta3_deg:.2f} degrees")
+
+    # Calculate joint positions
+    x1, y1, z1 = 0, 0, l1  # Base joint position
+    x2 = l2 * np.cos(theta1) * np.cos(theta2)
+    y2 = l2 * np.sin(theta1) * np.cos(theta2)
+    z2 = l1 + l2 * np.sin(theta2)
+    x3 = x2 + l3 * np.cos(theta1) * np.cos(theta2 + theta3)
+    y3 = y2 + l3 * np.sin(theta1) * np.cos(theta2 + theta3)
+    z3 = z2 + l3 * np.sin(theta2 + theta3)
+
+    print(f"Position of joint 1: ({x1:.2f}, {y1:.2f}, {z1:.2f})")
+    print(f"Position of joint 2: ({x2:.2f}, {y2:.2f}, {z2:.2f})")
+    print(f"Position of end-effector: ({x3:.2f}, {y3:.2f}, {z3:.2f})")
+
+    # Plot the arm
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+
+    # Plot links
+    ax.plot([0, 0], [0, 0], [0, l1], 'r', linewidth=3, label='Base Link')
+    ax.plot([0, x2], [0, y2], [l1, z2], 'g', linewidth=3, label='Link 1')
+    ax.plot([x2, x3], [y2, y3], [z2, z3], 'b', linewidth=3, label='Link 2')
+
+    # Plot joints and target
+    ax.scatter([0, x2, x3], [0, y2, y3], [l1, z2, z3], c='k', s=50, label='Joints')
+    ax.scatter(px, py, pz, c='orange', s=100, label='Target Point')
+
+    # Set labels and title
+    ax.set_xlabel('X-axis')
+    ax.set_ylabel('Y-axis')
+    ax.set_zlabel('Z-axis')
+    ax.set_title('3D Inverse Kinematics of a Robot Arm')
+    ax.legend()
+
+    plt.show()
+
+except ValueError as e:
+    print(e)
